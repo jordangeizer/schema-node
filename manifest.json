@@ -1,0 +1,14 @@
+{
+  "name": "Schema Node",
+  "id": "1237321464981985919",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "editorType": [
+    "figjam",
+    "figma"
+  ],
+  "containsWidget": true,
+  "widgetApi": "1.0.0"
+}

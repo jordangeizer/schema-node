@@ -1,0 +1,26 @@
+{
+  "name": "schema-node",
+  "version": "1.0.0",
+  "description": "Your Figma widget",
+  "scripts": {
+    "build": "esbuild src/code.tsx --bundle --outfile=dist/code.js --target=es6",
+    "tsc": "tsc --noEmit -p src",
+    "watch": "npm run build -- --watch"
+  },
+  "author": "",
+  "license": "",
+  "devDependencies": {
+    "@figma/plugin-typings": "*",
+    "@figma/widget-typings": "*",
+    "esbuild": "*",
+    "typescript": "*"
+  },
+  "eslintConfig": {
+    "extends": [
+      "wesbos/typescript"
+    ]
+  },
+  "dependencies": {
+    "eslint-config-wesbos": "^3.2.3"
+  }
+}
