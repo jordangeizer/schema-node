@@ -2,16 +2,18 @@ const { widget } = figma
 const { AutoLayout, Text, SVG, Input, Rectangle } = widget
 
 interface layout {
+	borderColor: string,
 	icon: string,
 	inputColor: string,
 	inputValue: string,
 	layoutMode: string
 	mode: string,
+	typeColor: string,
 	typeLabel: string,
 	updateText: any,
 }
 
-export const Layout = ({ layoutMode, icon, typeLabel, inputColor, inputValue, updateText }: layout) => {
+export const Layout = ({ borderColor, layoutMode, icon, typeLabel, typeColor, inputColor, inputValue, updateText }: layout) => {
 	if (layoutMode === 'EXPANDED') {
 		return (
 			<AutoLayout
@@ -39,14 +41,14 @@ export const Layout = ({ layoutMode, icon, typeLabel, inputColor, inputValue, up
 					height={'hug-contents'}
 					direction="horizontal"
 				>
-					<Text fontSize={16} fontFamily="Space Mono" fontWeight="normal" horizontalAlignText={'left'} fill={'#00BBFF'} width={'fill-parent'}>
+					<Text fontSize={16} fontFamily="Space Mono" fontWeight="normal" horizontalAlignText={'left'} fill={typeColor} width={'fill-parent'}>
 						{typeLabel}
 					</Text>
 					<SVG
 						src={icon}
 					/>
 				</AutoLayout>
-				<Rectangle height={2} width={'fill-parent'} fill={'#00A6FF'} />
+				<AutoLayout height={2} width={'fill-parent'} fill={borderColor} />
 				<AutoLayout
 					verticalAlignItems={'center'}
 					spacing={4}
@@ -112,7 +114,7 @@ export const Layout = ({ layoutMode, icon, typeLabel, inputColor, inputValue, up
 						fill={inputColor}
 						width="fill-parent"
 					/>
-					<Text fontSize={16} fontFamily="Space Mono" fontWeight="normal" horizontalAlignText={'left'} verticalAlignText="center" fill={'#00BBFF'} width={104} height={'fill-parent'}>
+					<Text fontSize={16} fontFamily="Space Mono" fontWeight="normal" horizontalAlignText={'left'} verticalAlignText="center" fill={typeColor} width={104} height={'fill-parent'}>
 						{typeLabel}
 					</Text>
 					<SVG
