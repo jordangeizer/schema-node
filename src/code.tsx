@@ -3,7 +3,7 @@ import { Layout } from "./layout";
 import icons from "./icons";
 
 const { widget } = figma
-const { useSyncedState, usePropertyMenu } = widget
+const { useSyncedState, usePropertyMenu, useWidgetId } = widget
 
 
 function Widget() {
@@ -14,16 +14,29 @@ function Widget() {
   const [layoutMode, setLayoutMode] = useSyncedState("layoutMode", "EXPANDED");
   const layoutModeOptions = [{ option: "EXPANDED", label: "Exanded" }, { option: "COMPACT", label: "Compact" }, { option: "CONCISE", label: "Concise" }, { option: "NODE", label: "Node" }]
 
+  const widgetId = useWidgetId()
+  const inputColor = schemaType === 'Union' || schemaType === 'Enum' || schemaType === 'Scalar' || schemaType === 'Custom' ? '#C3AAFF' : '#FFFFFF'
+  const formattedType = ''.concat(isArray === true ? (`[${schemaType}]`) : (`${schemaType}`), isNonNullable === true ? `!` : '')
+
   // Property menu
   const propertyMenuItems: Array<WidgetPropertyMenuItem> = [];
 
   propertyMenuItems.push({
-    itemType: 'dropdown',
-    tooltip: 'Layout mode',
-    propertyName: 'layoutMode',
-    options: layoutModeOptions,
-    selectedOption: layoutMode
-  });
+    tooltip: 'Add node',
+    propertyName: 'Add',
+    itemType: 'action',
+    icon: `<svg fill="#FFFFFF" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><g><path clip-rule="evenodd" d="m16.25 17.5h-12.5c-.33142-.0003-.64917-.1321-.88352-.3665-.23435-.2343-.36615-.5521-.36648-.8835v-12.5c.00033-.33142.13213-.64917.36648-.88352s.5521-.36615.88352-.36648h12.5c.3314.00033.6492.13213.8835.36648.2344.23435.3662.5521.3665.88352v12.5c-.0003.3314-.1321.6492-.3665.8835-.2343.2344-.5521.3662-.8835.3665zm-12.5-13.75v12.5h12.5006l-.0006-12.5z" fill-rule="evenodd"/><path d="m9.25 6h1.25v3.25h3.5v1.25h-3.5v3.5h-1.25v-3.5h-3.25v-1.25h3.25z"/></g></svg>`,
+  },
+    {
+      itemType: 'separator',
+    },
+    {
+      itemType: 'dropdown',
+      tooltip: 'Layout mode',
+      propertyName: 'layoutMode',
+      options: layoutModeOptions,
+      selectedOption: layoutMode
+    });
 
   propertyMenuItems.push({
     itemType: 'separator',
@@ -70,6 +83,15 @@ function Widget() {
         setIsNonNullable(!isNonNullable)
       } else if (propertyName === "layoutMode" && propertyValue !== layoutMode) {
         setLayoutMode(propertyValue!)
+      } else if (propertyName === "Add") {
+        const widgetNode = figma.getNodeById(widgetId) as WidgetNode;
+        const clonedWidget = widgetNode.clone();
+
+        // Position the cloned widget beside this widget
+        widgetNode.parent!.appendChild(clonedWidget);
+        clonedWidget.x = widgetNode.x;
+        clonedWidget.y = widgetNode.y + widgetNode.height + 30;
+        figma.currentPage.selection = [clonedWidget];
       } else if (
         propertyName === 'String' ||
         propertyName === 'Int' ||
@@ -89,9 +111,6 @@ function Widget() {
   }
 
   usePropertyMenu(propertyMenuItems, onChange);
-
-  const inputColor = schemaType === 'Union' || schemaType === 'Enum' || schemaType === 'Scalar' || schemaType === 'Custom' ? '#C3AAFF' : '#FFFFFF'
-  const formattedType = ''.concat(isArray === true ? (`[${schemaType}]`) : (`${schemaType}`), isNonNullable === true ? `!` : '')
 
   return (
     <Layout
