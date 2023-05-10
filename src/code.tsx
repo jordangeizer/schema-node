@@ -1,28 +1,28 @@
 import schemaTypes from "./schema-types";
-import toggleTypes from "./toggle-types";
+import { Layout } from "./layout";
 import icons from "./icons";
 
 const { widget } = figma
-const { useSyncedState, usePropertyMenu, AutoLayout, Text, SVG, Input, Rectangle } = widget
+const { useSyncedState, usePropertyMenu } = widget
 
 
 function Widget() {
-  console.log("Rendering widget...")
   const [fieldName, setFieldName] = useSyncedState("fieldName", "");
   const [schemaType, setSchemaType] = useSyncedState("schemaType", "String");
   const [isArray, setIsArray] = useSyncedState("isArray", false);
   const [isNonNullable, setIsNonNullable] = useSyncedState("isNonNullable", false);
-  const [isHidden, setIsHidden] = useSyncedState("isHidden", false);
+  const [layoutMode, setLayoutMode] = useSyncedState("layoutMode", "EXPANDED");
+  const layoutModeOptions = [{ option: "EXPANDED", label: "Exanded" }, { option: "COMPACT", label: "Compact" }, { option: "CONCISE", label: "Concise" }, { option: "NODE", label: "Node" }]
 
   // Property menu
   const propertyMenuItems: Array<WidgetPropertyMenuItem> = [];
 
   propertyMenuItems.push({
-    tooltip: 'Hide Type',
-    propertyName: 'Hide',
-    itemType: 'toggle',
-    isToggled: isHidden,
-    icon: `<svg fill="#FFFFFF" height="20" width="20" xmlns="http://www.w3.org/2000/svg"><g><path d="m8.29661 8.3949c-.40764.38823-.65494.90322-.69667 1.45081l-1.09202 1.03429c-.16024-.5796-.15816-1.18901.00603-1.76757.1642-.57856.48476-1.10602.92975-1.5298.44498-.42379.99883-.72908 1.60634-.88545.6075-.15637 1.24746-.15835 1.85596-.00575l-1.08599 1.04c-.57499.03974-1.11575.27525-1.5234.66347z"/><path clip-rule="evenodd" d="m15.5202 5.55429c1.5589 1.06687 2.756 2.54468 3.4441 4.25142.0476.12555.0476.26299 0 .38859-.7058 1.7385-1.9309 3.2419-3.5241 4.3245-1.5931 1.0826-3.4844 1.6969-5.4402 1.7669-1.58161-.0243-3.12975-.4377-4.49411-1.2l-3.06009 2.9143-.84602-.8057 15.95442-15.1943.846.80571zm-3.4471 5.58371c.2117-.3455.3244-.7379.327-1.138-.0044-.40248-.1203-.79672-.336-1.14286l-3.26412 3.10856c.36379.2001.77635.3057 1.19643.3063.42009.0006.83299-.1038 1.19739-.3028s.6676-.4856.8793-.8312zm-5.67319 3.102c1.10637.5722 2.3413.8819 3.60009.9029 3.1801 0 6.5402-2.2458 7.7582-5.1429-.6486-1.46547-1.7253-2.72287-3.1021-3.62286l-1.722 1.64c.481.66019.7032 1.46031.6279 2.26066-.0753.8003-.4435 1.55-1.0401 2.1182s-1.3838.9188-2.2242.9906c-.84038.0717-1.68053-.1399-2.37375-.598z" fill-rule="evenodd"/><path d="m4.40184 12.9086-.85803.8114c-1.11577-.9708-1.9751-2.1788-2.50806-3.5257-.047665-.1256-.047665-.26304 0-.38859.70571-1.73848 1.93086-3.24193 3.52401-4.32452 1.59316-1.08259 3.48449-1.69686 5.44023-1.7669 1.14461.01334 2.27561.23847 3.33011.66285l-.93.89143c-.7708-.26212-1.5818-.40114-2.40011-.41143-3.18009 0-6.54018 2.24572-7.75821 5.14286.4824 1.1113 1.22056 2.1052 2.16006 2.9086z"/></g></svg>`,
+    itemType: 'dropdown',
+    tooltip: 'Layout mode',
+    propertyName: 'layoutMode',
+    options: layoutModeOptions,
+    selectedOption: layoutMode
   });
 
   propertyMenuItems.push({
@@ -61,22 +61,29 @@ function Widget() {
   );
 
   async function onChange({
-    propertyName,
+    propertyName, propertyValue
   }: WidgetPropertyEvent): Promise<void> {
     await new Promise<void>(function (resolve: () => void): void {
       if (propertyName === "Array") {
         setIsArray(!isArray);
       } else if (propertyName === "NonNullable") {
         setIsNonNullable(!isNonNullable)
-      } else if (propertyName === "Hide") {
-        setIsHidden(!isHidden);
-      } else {
-        const updatedItem = schemaTypes.find((i) => i.title === propertyName);
-        if (updatedItem) {
-          setSchemaType(updatedItem.title)
-        };
+      } else if (propertyName === "layoutMode" && propertyValue !== layoutMode) {
+        setLayoutMode(propertyValue!)
+      } else if (
+        propertyName === 'String' ||
+        propertyName === 'Int' ||
+        propertyName === 'Float' ||
+        propertyName === 'Boolean' ||
+        propertyName === 'ID' ||
+        propertyName === 'Union' ||
+        propertyName === 'Enum' ||
+        propertyName === 'Scalar' ||
+        propertyName === 'Custom') {
+        if (propertyName !== schemaType) {
+          setSchemaType(propertyName)
+        }
       }
-      console.log("Firing")
       figma.closePlugin();
     });
   }
@@ -86,74 +93,17 @@ function Widget() {
   const inputColor = schemaType === 'Union' || schemaType === 'Enum' || schemaType === 'Scalar' || schemaType === 'Custom' ? '#C3AAFF' : '#FFFFFF'
   const formattedType = ''.concat(isArray === true ? (`[${schemaType}]`) : (`${schemaType}`), isNonNullable === true ? `!` : '')
 
-
   return (
-    <AutoLayout
-      verticalAlignItems={'center'}
-      spacing={0}
-      padding={0}
-      cornerRadius={8}
-      fill={'#282C34'}
-      direction={'vertical'}
-      width={360}
-    >
-      {isHidden === false ? (
-        <>
-          <AutoLayout
-            verticalAlignItems={'center'}
-            spacing={4}
-            positioning={'auto'}
-            padding={
-              {
-                top: 12,
-                left: 16,
-                bottom: 12,
-                right: 16
-              }
-            }
-            width={'fill-parent'}
-            height={'hug-contents'}
-            direction="horizontal"
-          >
-            <Text fontSize={16} fontFamily="Space Mono" fontWeight="normal" horizontalAlignText={'left'} fill={'#1BCDF4'} width={'fill-parent'}>
-              {formattedType}
-            </Text>
-            <SVG
-              src={icons[schemaType]}
-            />
-          </AutoLayout>
-          <Rectangle height={2} width={'fill-parent'} fill={'#3E4555'} />
-        </>
-      ) : null}
-      <AutoLayout
-        verticalAlignItems={'center'}
-        spacing={4}
-        positioning="auto"
-        padding={
-          {
-            top: 12,
-            left: 16,
-            bottom: 12,
-            right: 16
-          }
-        }
-        width={'fill-parent'}
-        height={'hug-contents'}
-        direction="horizontal"
-      >
-        <Input value={fieldName} onTextEditEnd={(e) => {
-          setFieldName(e.characters)
-        }}
-          placeholder="Field name..."
-          fontSize={16}
-          fontFamily="Space Mono"
-          fontWeight="normal"
-          horizontalAlignText={'left'}
-          fill={inputColor}
-          width={'fill-parent'}
-        />
-      </AutoLayout>
-    </AutoLayout>
+    <Layout
+      icon={icons[schemaType]}
+      inputColor={inputColor}
+      inputValue={fieldName}
+      layoutMode={layoutMode}
+      mode={layoutMode}
+      typeLabel={formattedType}
+      updateText={(e: Record<string, string>) => {
+        setFieldName(e.characters)
+      }} />
   )
 }
 
