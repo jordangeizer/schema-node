@@ -24,7 +24,7 @@ function Widget() {
   const [isArray, setIsArray] = useSyncedState("isArray", false);
   const [isNonNullable, setIsNonNullable] = useSyncedState("isNonNullable", false);
   const [layoutMode, setLayoutMode] = useSyncedState("layoutMode", "EXPANDED");
-  const layoutModeOptions = [{ option: "EXPANDED", label: "Exanded" }, { option: "COMPACT", label: "Compact" }, { option: "CONCISE", label: "Concise" }, { option: "NODE", label: "Node" }]
+  const layoutModeOptions = [{ option: "EXPANDED", label: "Expanded" }, { option: "COMPACT", label: "Compact" }, { option: "CONCISE", label: "Concise" }, { option: "NODE", label: "Node" }]
 
   const widgetId = useWidgetId()
   const typeColor = schemaType === 'UNION' || schemaType === 'ENUM' || schemaType === 'SCALAR' || schemaType === 'INTERFACE' ? '#C3AAFF' : '#00BBFF';
